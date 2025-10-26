@@ -18,6 +18,14 @@ class Owner:
         for pet in self.pets:
             print(pet.get_info())
             print("---------")
+    def delete_pet(self, pet):
+        try:
+            pet_name = pet.get_name()
+            self.pets.remove(pet)
+            print(f"Питомец {pet_name} был удален из списка питомцев :(")
+        except ValueError:
+            print("Неправильная кличка питомца")
+
 
 
 class Pet:
@@ -35,10 +43,10 @@ class Pet:
     def get_info(self):
         return f"Name: {self.name}\n Age: {self.age}\n Breed {self.breed} \n Color: {self.color}"
 
-    def set_owner(self, owner):
+    def set_owner(self, owner ):
         self.owner = owner
-
-
+    def get_name(self):
+        return self.name
 
 class Dog(Pet):
     hunting = None
@@ -76,14 +84,9 @@ class Bird(Pet):
         super(Bird, self).__init__(name,age,breed,color)
         self.can_fly = can_fly
     def get_info(self):
-        return f"Name: {self.name}\n Age: {self.age}\n Breed {self.breed} \n Color {self.color} \n Can fly: {self.can_fly}"
+        return print(f"Name: {self.name}\n Age: {self.age}\n Breed {self.breed} \n Color {self.color} \n Can fly: {self.can_fly}")
 
-    def set_info(self, name, age, breed, color, can_fly):
-        self.name = name
-        self.age = age
-        self.breed = breed
-        self.color = color
-        self.can_fly = can_fly
+
 
 
 class Traning():
@@ -101,23 +104,84 @@ class Traning():
         except ValueError:
             print("Такого умения нет у питомца")
 
+class Eat():
+    def __init__(self, pet : Pet , omnivorous):
+        self.omnivorous = omnivorous
+        self.pet = pet
+        self.food = []
+        self.portions = []
+    def what_eat(self, meal, dose):
+        self.food.append(meal)
+        self.portions.append(dose)
+    def get_info(self):
+        return f"Питомец {self.pet.name} ест {self.food} порции {self.portions}"
+    def remove_food_or_portions(self, meal, dose):
+        try:
+            self.food.remove(meal)
+            self.portions.remove(dose)
+        except ValueError:
+            print("Неправильное название")
+
+class Veterinarian():
+    def __init__(self, pet : Pet, name, date):
+        self.pet = pet
+        self.name = name
+        self.date = date
+    def visite(self):
+        return print(f"{self.date} было посещения ветеринара {self.name} с питомцом {self.pet.name}")
+
+class Vaccination():
+    def __init__(self, pet : Pet):
+        self.pet = pet
+        self.vaccine = []
+        self.visits = []
+    def visite(self, vis, vaci):
+        self.visits.append(vis)
+        self.vaccine.append(vaci)
+    def get_info(self):
+        return print(f"{self.visits} была сделана {self.vaccine} питомцу {self.pet.name}")
+    def remove_vaccine_and_visit(self, vis, vaci):
+        try:
+            self.vaccine.remove(vis)
+            self.visits.remove(vaci)
+        except ValueError:
+            print("Неправильное названия или дата")
+
 if __name__ == "__main__":
     a = Fish("jack", 15, "rock", "red", "Yes")
     b = Fish("lack", 15, "rock", "red", "Yes")
     owner = Owner("Max", "123345", "street")
+    a.set_owner(owner)
     owner.add_pet(a)
     owner.add_pet(b)
     bird = Bird("Popug", 3, "pocker", "yellow", "Yes")
     owner.add_pet(bird)
+    bird.get_info()
+    bird.can_fly = "False"
+    bird.get_info()
+    food = Eat(bird, "Yes")
+    food.what_eat("макароны", "150 грамм")
+    food.what_eat("мясо", "500 грамм")
+    print(food.get_info())
+    food.remove_food_or_portions("мясо", "150 грамм")
+    print(food.get_info())
+    vet = Veterinarian(a,"Max", "21.21.2009")
+    vet.visite()
+
+    vac = Vaccination(a)
+    vac.visite("21.19.2034", " от бешенаства")
+    vac.visite("26.19.2034", "прививка")
+    vac.get_info()
 
 
+    tr = Traning(a, "LUKER")
+    tr.skils("сидеть")
+    tr.skils("кувырок")
+    tr.all_skils()
+    tr.delete_skils("сидеть")
+    tr.all_skils()
 
-
-
-    # tr = Traning(a, "LUKER")
-    # tr.skils("сидеть")
-    # tr.skils("кувырок")
-    # tr.all_skils()
-    # tr.delete_skils("сидеть")
-    # tr.all_skils()
-
+    print("--------")
+    owner.show_all_pets()
+    owner.delete_pet(a)
+    owner.show_all_pets()
