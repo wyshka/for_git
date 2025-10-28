@@ -10,6 +10,8 @@ class Owner:
         self.phone = phone
         self.address = address
         self.pets = []
+        self.veterinarians = []
+
 
     def add_pet(self, pet):
         self.pets.append(pet)
@@ -40,6 +42,20 @@ class Owner:
             pet = Pet.from_dict(pet_data)
             owner.add_pet(pet)
         return owner
+    def clear_all_pets(self):
+        pet_count = len(self.pets)
+        self.pets.clear()
+        print(f"{pet_count} питомцев удалены")
+
+    def remove_pet_by_name(self, pet_name):
+        for pet in self.pets:
+            if pet.name == pet_name:
+                self.pets.remove(pet)
+                print(f"Питомец {pet_name} удален")
+                return True
+        print(f"Питомец {pet_name} не найден")
+        return False
+
 
 
 class Pet:
@@ -144,6 +160,17 @@ class Pet:
             pet.set_vaccination(vaccination)
 
         return pet
+    def remove_training(self):
+        self.training = None
+        print(f"Тренировки для {self.name} удалены")
+
+    def remove_eat(self):
+        self.eat = None
+        print(f"Данные о питании {self.name} удалены")
+
+    def remove_vaccination(self):
+        self.vaccination = None
+        print(f"Данные о вакцинации {self.name} удаены")
 
 
 class Dog(Pet):
@@ -357,6 +384,21 @@ class FileManager:
             owners.append(owner)
         print(f"Данные загружены из {filename}")
         return owners
+    @staticmethod
+    def delete_json_file(filename="pets_data.json"):
+        try:
+            remove(filename)
+            print(f"Файл {filename} удален")
+        except FileNotFoundError:
+            print(f"Файл {filename} не найден")
+
+    @staticmethod
+    def delete_xml_file(filename="pets_data.xml"):
+        try:
+            remove(filename)
+            print(f"Файл {filename} удален")
+        except FileNotFoundError:
+            print(f"Файл {filename} не найден")
 
 
 if __name__ == "__main__":
