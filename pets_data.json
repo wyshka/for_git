@@ -11,6 +11,23 @@
           "age": 15,
           "breed": "rock",
           "color": "red",
+          "training": {
+            "traner": "LUKER",
+            "ability": [
+              "сидеть",
+              "кувырок"
+            ]
+          },
+          "vaccination": {
+            "vaccine": [
+              "от бешенаства",
+              "прививка"
+            ],
+            "visits": [
+              "21.19.2034",
+              "26.19.2034"
+            ]
+          },
           "need_oxygen": "Yes"
         },
         {
@@ -27,6 +44,17 @@
           "age": 3,
           "breed": "pocker",
           "color": "yellow",
+          "eat": {
+            "omnivorous": "Yes",
+            "food": [
+              "макароны",
+              "мясо"
+            ],
+            "portions": [
+              "150 грамм",
+              "500 грамм"
+            ]
+          },
           "can_fly": "Yes"
         }
       ]
