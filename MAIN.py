@@ -10,7 +10,6 @@ class Owner:
         self.phone = phone
         self.address = address
         self.pets = []
-        self.veterinarians = []
 
 
     def add_pet(self, pet):
