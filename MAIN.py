@@ -418,7 +418,7 @@ if __name__ == "__main__":
     food.what_eat("макароны", "150 грамм")
     food.what_eat("мясо", "500 грамм")
     print(food.get_info())
-    food.remove_food_or_portions("мясо", "500 грамм")  # Исправлено: должна быть правильная порция
+    food.remove_food_or_portions("мясо", "500 грамм")
     print(food.get_info())
 
     vet = Veterinarian(a, "Max", "21.21.2009")
