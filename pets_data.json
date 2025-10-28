@@ -1,0 +1,35 @@
+{
+  "owners": [
+    {
+      "name_own": "Max",
+      "phone": "123345",
+      "address": "street",
+      "pets": [
+        {
+          "type": "Fish",
+          "name": "jack",
+          "age": 15,
+          "breed": "rock",
+          "color": "red",
+          "need_oxygen": "Yes"
+        },
+        {
+          "type": "Fish",
+          "name": "lack",
+          "age": 15,
+          "breed": "rock",
+          "color": "red",
+          "need_oxygen": "Yes"
+        },
+        {
+          "type": "Bird",
+          "name": "Popug",
+          "age": 3,
+          "breed": "pocker",
+          "color": "yellow",
+          "can_fly": "Yes"
+        }
+      ]
+    }
+  ]
+}
