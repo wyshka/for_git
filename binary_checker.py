@@ -4,6 +4,7 @@ def is_binary_number(a):
         if char != '0' and char != '1':
             return False
     return True
+
 def search_bin_3(a):
     is_binary = True
     a_str = str(a)
@@ -27,7 +28,6 @@ def read_numbers_from_file(filename):
                 if not line:
                     continue
                 if ',' in line:
-                    # Числа разделенные запятыми
                     parts = line.split(',')
                     for part in parts:
                         part = part.strip()
@@ -37,7 +37,6 @@ def read_numbers_from_file(filename):
                         else:
                             print(f"Строка {line_num}: пропущено '{part}' (не число)")
                 else:
-                    # Одно число на строку
                     if line.isdigit():
                         numbers.append(int(line))
                         print(f"Строка {line_num}: прочитано число {line}")
@@ -46,8 +45,8 @@ def read_numbers_from_file(filename):
                 print(f"Прочитано {len(numbers)} чисел из файла")
     except FileNotFoundError:
         print(f"Файл '{filename}' не найден")
-
     return numbers
+
 
 def process_numbers(numbers_list):
     binary_numbers = []
@@ -61,6 +60,7 @@ def process_numbers(numbers_list):
             binary_numbers.append(binary_num)
         else:
             non_binary_numbers.append(number)
+
     print("ИТОГ")
     print(f"Всего проверено: {len(numbers_list)} чисел")
     print(f"Двоичных чисел: {len(binary_numbers)}")
@@ -77,10 +77,10 @@ def process_numbers(numbers_list):
             print(f"{i}. {num}")
     return binary_numbers, non_binary_numbers
 
+
 def manual_input():
     numbers = []
     print("Вводите числа по одному, завершения '-':")
-
     while True:
         user_input = input("Введите число: ").strip()
         if user_input.lower() == '-':
@@ -92,36 +92,42 @@ def manual_input():
             print("Введите целое число или '-' для завершения")
     return numbers
 
+
 def main():
     while True:
         print("\nВыберите источник данных:")
         print("1. Ввести числа вручную")
         print("2. Прочитать числа из файла")
         choice = input("\nВаш выбор (1-2): ").strip()
+
         if choice == '1':
-            # Ручной ввод
             numbers = manual_input()
             if numbers:
                 binary_nums, non_binary_nums = process_numbers(numbers)
-                # Дополнительная информация
                 if binary_nums:
-                    print(
-                        f"\nДвоичные числа составляют: {len(binary_nums)} от общего количества")
+                    print(f"\nДвоичные числа составляют: {len(binary_nums)} от общего количества")
             else:
                 print("Не введено ни одного числа")
 
 
         elif choice == '2':
-            # Чтение из файла
-            filename = input("\nВведите имя файла : ").strip()
+            filename = input("\nВведите имя файла: ").strip()
             numbers = read_numbers_from_file(filename)
             if numbers:
                 binary_nums, non_binary_nums = process_numbers(numbers)
                 if binary_nums:
-                    print(
-                        f"\nДвоичные числа составляют: {len(binary_nums)} от общего количества")
+                    print(f"\nДвоичные числа составляют: {len(binary_nums)} от общего количества")
             else:
                 print("Не удалось прочитать числа из файла")
+        else:
+            print("Неверный выбор. Попробуйте снова.")
+            continue
+
+        continue_choice = input("\nХотите продолжить? (y/n): ").strip().lower()
+        if continue_choice != 'y':
+            print("Выход из программы.")
+            break
+
 
 if __name__ == "__main__":
     main()
