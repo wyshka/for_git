@@ -2,7 +2,7 @@ import unittest
 from io import StringIO
 from unittest.mock import patch, mock_open
 
-# Импортируем функции напрямую из файла в той же папке
+
 import sys
 import os
 
