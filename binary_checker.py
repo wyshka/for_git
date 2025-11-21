@@ -1,23 +1,21 @@
+import re
+
+
 def is_binary_number(a):
-    a_str = str(a)
-    for char in a_str:
-        if char != '0' and char != '1':
-            return False
-    return True
+    # Проверка с помощью регулярного выражения: строка должна содержать только 0 и 1
+    return bool(re.match(r'^[01]+$', str(a)))
+
 
 def search_bin_3(a):
-    is_binary = True
     a_str = str(a)
-    for char in a_str:
-        if char not in '01':
-            is_binary = False
-            break
-    if is_binary:
+    # Используем регулярное выражение для проверки
+    if re.match(r'^[01]+$', a_str):
         print(f"Число {a} - двоичное")
         return True, a
     else:
         print(f"Число {a} - не двоичное")
         return False, None
+
 
 def read_numbers_from_file(filename):
     numbers = []
@@ -27,21 +25,18 @@ def read_numbers_from_file(filename):
                 line = line.strip()
                 if not line:
                     continue
-                if ',' in line:
-                    parts = line.split(',')
-                    for part in parts:
-                        part = part.strip()
-                        if part.isdigit():
-                            numbers.append(int(part))
-                            print(f"Строка {line_num}: прочитано число {part}")
-                        else:
-                            print(f"Строка {line_num}: пропущено '{part}' (не число)")
+
+                # Используем регулярное выражение для поиска всех чисел в строке
+                # \b - граница слова, \d+ - одна или более цифр
+                number_matches = re.findall(r'\b\d+\b', line)
+
+                if number_matches:
+                    for number_str in number_matches:
+                        numbers.append(int(number_str))
+                        print(f"Строка {line_num}: прочитано число {number_str}")
                 else:
-                    if line.isdigit():
-                        numbers.append(int(line))
-                        print(f"Строка {line_num}: прочитано число {line}")
-                    else:
-                        print(f"Строка {line_num}: пропущено '{line}' (не число)")
+                    print(f"Строка {line_num}: не содержит чисел")
+
                 print(f"Прочитано {len(numbers)} чисел из файла")
     except FileNotFoundError:
         print(f"Файл '{filename}' не найден")
@@ -69,7 +64,7 @@ def process_numbers(numbers_list):
     if binary_numbers:
         print(f"\nСписок двоичных чисел:")
         for i, num in enumerate(binary_numbers, 1):
-            print(f"{i}. {num}")
+            print(f"{i}. {num} (десятичное: {int(str(num), 2)})")
 
     if non_binary_numbers:
         print(f"\nСписок не двоичных чисел:")
@@ -85,7 +80,8 @@ def manual_input():
         user_input = input("Введите число: ").strip()
         if user_input.lower() == '-':
             break
-        if user_input.isdigit():
+        # Используем регулярное выражение для проверки, что введено целое число
+        if re.match(r'^-?\d+$', user_input):
             numbers.append(int(user_input))
             print(f"Добавлено число: {user_input}")
         else:
@@ -109,7 +105,6 @@ def main():
             else:
                 print("Не введено ни одного числа")
 
-
         elif choice == '2':
             filename = input("\nВведите имя файла: ").strip()
             numbers = read_numbers_from_file(filename)
@@ -122,6 +117,7 @@ def main():
         else:
             print("Неверный выбор. Попробуйте снова.")
             continue
+
 
         continue_choice = input("\nХотите продолжить? (y/n): ").strip().lower()
         if continue_choice != 'y':

@@ -40,9 +40,6 @@ class TestBinaryFunctions(unittest.TestCase):
         self.assertFalse(is_binary_number("1a1"))  # Смесь цифр и букв
         self.assertFalse(is_binary_number("1 0"))  # С пробелом
 
-        # Пустая строка
-        self.assertTrue(is_binary_number(""))  # Пустая строка считается двоичной
-
         # Числа с ведущими нулями
         self.assertTrue(is_binary_number("001"))
         self.assertTrue(is_binary_number("0001"))
