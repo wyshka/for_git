@@ -1,214 +1,232 @@
-import unittest
-from io import StringIO
-from unittest.mock import patch, mock_open
-
-# Импортируем функции напрямую из файла в той же папке
-import sys
-import os
-
-sys.path.append(os.path.dirname(__file__))
-
-from binary_checker import is_binary_number, search_bin_3, process_numbers, read_numbers_from_file, manual_input
+import tkinter as tk
+from tkinter import ttk, messagebox
+import time
+import threading
 
 
-class TestBinaryFunctions(unittest.TestCase):
+class TimerStopwatchApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Таймер-секундомер")
+        self.root.geometry("450x500")
+        self.root.minsize(400, 450)
 
-    def test_1_is_binary_number_correct(self):
-        """Тест 1: Корректные двоичные числа"""
-        self.assertTrue(is_binary_number(101))
-        self.assertTrue(is_binary_number(0))
-        self.assertTrue(is_binary_number(1))
-        self.assertTrue(is_binary_number(111000))
-        self.assertTrue(is_binary_number(1111111111))
+        self.timer_running = False
+        self.stopwatch_running = False
+        self.timer_time = 0
+        self.stopwatch_time = 0
+        self.timer_thread = None
+        self.stopwatch_thread = None
 
-    def test_2_is_binary_number_incorrect(self):
-        """Тест 2: Некорректные двоичные числа"""
-        self.assertFalse(is_binary_number(123))
-        self.assertFalse(is_binary_number(102))
-        self.assertFalse(is_binary_number(999))
-        self.assertFalse(is_binary_number(1002))
-        self.assertFalse(is_binary_number(123456789))
+        self.create_widgets()
 
-    def test_3_is_binary_number_edge_cases(self):
-        """Тест 3: Граничные случаи для is_binary_number"""
-        # Строковый ввод
-        self.assertTrue(is_binary_number("101"))
-        self.assertTrue(is_binary_number("0"))
-        self.assertTrue(is_binary_number("1"))
-        self.assertFalse(is_binary_number("102"))
-        self.assertFalse(is_binary_number("abc"))  # Не числа вообще
-        self.assertFalse(is_binary_number("1a1"))  # Смесь цифр и букв
-        self.assertFalse(is_binary_number("1 0"))  # С пробелом
+        self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
 
-        # Числа с ведущими нулями
-        self.assertTrue(is_binary_number("001"))
-        self.assertTrue(is_binary_number("0001"))
+    def create_widgets(self):
+        main_frame = ttk.Frame(self.root, padding="20")
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        title_label = ttk.Label(main_frame, text="Таймер-секундомер", font=("Arial", 18, "bold"))
+        title_label.pack(pady=(0, 20))
+        notebook = ttk.Notebook(main_frame)
+        notebook.pack(fill=tk.BOTH, expand=True, pady=10)
+        self.create_stopwatch_tab(notebook)
+        self.create_timer_tab(notebook)
 
-    def test_4_is_binary_number_special_cases(self):
-        """Тест 4: Специальные случаи"""
-        # Отрицательные числа
-        self.assertFalse(is_binary_number(-101))
-        self.assertFalse(is_binary_number(-1))
+    def create_stopwatch_tab(self, notebook):
+        stopwatch_frame = ttk.Frame(notebook, padding="20")
+        notebook.add(stopwatch_frame, text="Секундомер")
+        self.stopwatch_display = ttk.Label(stopwatch_frame, text="00:00:00", font=("Arial", 28, "bold"))
+        self.stopwatch_display.pack(pady=30)
 
-        # Ноль в разных форматах
-        self.assertTrue(is_binary_number(0))
-        self.assertTrue(is_binary_number("0"))
-        self.assertTrue(is_binary_number(00))  # Два нуля
+        button_frame = ttk.Frame(stopwatch_frame)
+        button_frame.pack(pady=30)
 
-    # Тесты для search_bin_3
-    def test_5_search_bin_3_binary(self):
-        """Тест 5: Проверка вывода для двоичного числа"""
-        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            result, value = search_bin_3(101)
-            output = mock_stdout.getvalue()
-            self.assertIn("Число 101 - двоичное", output)
-            self.assertTrue(result)
-            self.assertEqual(value, 101)
+        self.start_stopwatch_btn = ttk.Button(button_frame, text="Старт",command=self.start_stopwatch,width=10)
+        self.start_stopwatch_btn.pack(side=tk.LEFT, padx=10)
 
-    def test_6_search_bin_3_non_binary(self):
-        """Тест 6: Проверка вывода для не двоичного числа"""
-        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            result, value = search_bin_3(123)
-            output = mock_stdout.getvalue()
-            self.assertIn("Число 123 - не двоичное", output)
-            self.assertFalse(result)
-            self.assertIsNone(value)
+        self.stop_stopwatch_btn = ttk.Button(button_frame, text="Стоп",command=self.stop_stopwatch,state=tk.DISABLED,width=10)
+        self.stop_stopwatch_btn.pack(side=tk.LEFT, padx=10)
 
-    def test_7_search_bin_3_zero_and_one(self):
-        """Тест 7: Проверка граничных значений 0 и 1"""
-        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            result, value = search_bin_3(0)
-            output = mock_stdout.getvalue()
-            self.assertIn("Число 0 - двоичное", output)
-            self.assertTrue(result)
-            self.assertEqual(value, 0)
+        self.reset_stopwatch_btn = ttk.Button(button_frame, text="Сброс",command=self.reset_stopwatch,width=20)
+        self.reset_stopwatch_btn.pack(side=tk.LEFT, padx=10)
 
-        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            result, value = search_bin_3(1)
-            output = mock_stdout.getvalue()
-            self.assertIn("Число 1 - двоичное", output)
-            self.assertTrue(result)
-            self.assertEqual(value, 1)
+    def create_timer_tab(self, notebook):
+        timer_frame = ttk.Frame(notebook, padding="20")
+        notebook.add(timer_frame, text="Таймер")
+        input_frame = ttk.Frame(timer_frame)
+        input_frame.pack(pady=20)
+        hours_frame = ttk.Frame(input_frame)
+        hours_frame.pack(side=tk.LEFT, padx=15)
+        ttk.Label(hours_frame, text="Часы", font=("Arial", 12)).pack(pady=5)
+        self.hours_var = tk.StringVar(value="0")
+        hours_spinbox = ttk.Spinbox(hours_frame, from_=0, to=23, width=8,
+                                    textvariable=self.hours_var, font=("Arial", 12))
+        hours_spinbox.pack(pady=5)
 
+        minutes_frame = ttk.Frame(input_frame)
+        minutes_frame.pack(side=tk.LEFT, padx=15)
+        ttk.Label(minutes_frame, text="Минуты", font=("Arial", 12)).pack(pady=5)
+        self.minutes_var = tk.StringVar(value="0")
+        minutes_spinbox = ttk.Spinbox(minutes_frame, from_=0, to=59, width=8,
+                                      textvariable=self.minutes_var, font=("Arial", 12))
+        minutes_spinbox.pack(pady=5)
 
-    def test_8_search_bin_3_large_numbers(self):
-        """Тест 8: Проверка больших чисел"""
-        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            result, value = search_bin_3(111111111111)  # Большое двоичное
-            output = mock_stdout.getvalue()
-            self.assertIn("двоичное", output)
-            self.assertTrue(result)
+        seconds_frame = ttk.Frame(input_frame)
+        seconds_frame.pack(side=tk.LEFT, padx=15)
+        ttk.Label(seconds_frame, text="Секунды", font=("Arial", 12)).pack(pady=5)
+        self.seconds_var = tk.StringVar(value="0")
+        seconds_spinbox = ttk.Spinbox(seconds_frame, from_=0, to=59, width=8,
+                                      textvariable=self.seconds_var, font=("Arial", 12))
+        seconds_spinbox.pack(pady=5)
 
-        with patch('sys.stdout', new_callable=StringIO) as mock_stdout:
-            result, value = search_bin_3(999999999999)  # Большое недвоичное
-            output = mock_stdout.getvalue()
-            self.assertIn("не двоичное", output)
-            self.assertFalse(result)
+        self.timer_display = ttk.Label(timer_frame, text="00:00:00", font=("Arial", 28, "bold"))
+        self.timer_display.pack(pady=30)
 
-    # Тесты для process_numbers
-    def test_9_process_numbers_functionality(self):
-        """Тест 9: Проверка работы process_numbers"""
-        test_numbers = [101, 123, 0, 111, 456]
-        with patch('sys.stdout', new_callable=StringIO):
-            binary_nums, non_binary_nums = process_numbers(test_numbers)
-            self.assertEqual(binary_nums, [101, 0, 111])
-            self.assertEqual(non_binary_nums, [123, 456])
+        timer_button_frame = ttk.Frame(timer_frame)
+        timer_button_frame.pack(pady=30)
 
-    def test_10_process_numbers_empty_list(self):
-        """Тест 10: Обработка пустого списка"""
-        with patch('sys.stdout', new_callable=StringIO):
-            binary_nums, non_binary_nums = process_numbers([])
-            self.assertEqual(binary_nums, [])
-            self.assertEqual(non_binary_nums, [])
+        self.start_timer_btn = ttk.Button(timer_button_frame, text="Запуск",
+                                          command=self.start_timer,
+                                          width=10)
+        self.start_timer_btn.pack(side=tk.LEFT, padx=10)
 
-    def test_11_process_numbers_all_binary(self):
-        """Тест 11: Все числа двоичные"""
-        test_numbers = [101, 0, 1, 111, 1000]
-        with patch('sys.stdout', new_callable=StringIO):
-            binary_nums, non_binary_nums = process_numbers(test_numbers)
-            self.assertEqual(binary_nums, [101, 0, 1, 111, 1000])
-            self.assertEqual(non_binary_nums, [])
+        self.stop_timer_btn = ttk.Button(timer_button_frame, text="Пауза",
+                                         command=self.stop_timer,
+                                         state=tk.DISABLED,
+                                         width=10)
+        self.stop_timer_btn.pack(side=tk.LEFT, padx=10)
 
-    def test_12_process_numbers_all_non_binary(self):
-        """Тест 12: Все числа не двоичные"""
-        test_numbers = [123, 456, 789, 234, 567]
-        with patch('sys.stdout', new_callable=StringIO):
-            binary_nums, non_binary_nums = process_numbers(test_numbers)
-            self.assertEqual(binary_nums, [])
-            self.assertEqual(non_binary_nums, [123, 456, 789, 234, 567])
+        self.reset_timer_btn = ttk.Button(timer_button_frame, text="Сброс",
+                                          command=self.reset_timer,
+                                          width=10)
+        self.reset_timer_btn.pack(side=tk.LEFT, padx=10)
 
-    def test_13_process_numbers_single_element(self):
-        """Тест 13: Один элемент в списке"""
-        with patch('sys.stdout', new_callable=StringIO):
-            # Один двоичный элемент
-            binary_nums, non_binary_nums = process_numbers([101])
-            self.assertEqual(binary_nums, [101])
-            self.assertEqual(non_binary_nums, [])
+    def format_time(self, total_seconds):
+        try:
+            hours = int(total_seconds // 3600)
+            minutes = int((total_seconds % 3600) // 60)
+            seconds = int(total_seconds % 60)
+            return f"{hours:02d}:{minutes:02d}:{seconds:02d}"
+        except:
+            return "00:00:00"
 
-            # Один недвоичный элемент
-            binary_nums, non_binary_nums = process_numbers([123])
-            self.assertEqual(binary_nums, [])
-            self.assertEqual(non_binary_nums, [123])
+    def start_stopwatch(self):
+        try:
+            if not self.stopwatch_running:
+                self.stopwatch_running = True
+                self.start_stopwatch_btn.config(state=tk.DISABLED)
+                self.stop_stopwatch_btn.config(state=tk.NORMAL)
 
-    # Тесты для read_numbers_from_file
-    def test_14_read_numbers_from_file_valid(self):
-        """Тест 14: Чтение корректных данных из файла"""
-        test_data = "101\n123\n0\n1\n111000"
+                self.stopwatch_thread = threading.Thread(target=self.update_stopwatch, daemon=True)
+                self.stopwatch_thread.start()
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось запустить секундомер: {e}")
 
-        with patch('builtins.open', mock_open(read_data=test_data)):
-            with patch('sys.stdout', new_callable=StringIO):
-                numbers = read_numbers_from_file('test.txt')
-                self.assertEqual(numbers, [101, 123, 0, 1, 111000])
+    def stop_stopwatch(self):
+        try:
+            self.stopwatch_running = False
+            self.start_stopwatch_btn.config(state=tk.NORMAL)
+            self.stop_stopwatch_btn.config(state=tk.DISABLED)
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось остановить секундомер: {e}")
 
-    def test_15_read_numbers_from_file_with_commas(self):
-        """Тест 15: Чтение чисел с запятыми"""
-        test_data = "101, 123, 0, 1, 111000"
+    def reset_stopwatch(self):
+        try:
+            self.stopwatch_running = False
+            self.stopwatch_time = 0
+            self.stopwatch_display.config(text="00:00:00")
+            self.start_stopwatch_btn.config(state=tk.NORMAL)
+            self.stop_stopwatch_btn.config(state=tk.DISABLED)
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось сбросить секундомер: {e}")
 
-        with patch('builtins.open', mock_open(read_data=test_data)):
-            with patch('sys.stdout', new_callable=StringIO):
-                numbers = read_numbers_from_file('test.txt')
-                self.assertEqual(numbers, [101, 123, 0, 1, 111000])
+    def update_stopwatch(self):
+        start_time = time.time() - self.stopwatch_time
+        while self.stopwatch_running:
+            try:
+                self.stopwatch_time = time.time() - start_time
+                formatted_time = self.format_time(self.stopwatch_time)
+                self.stopwatch_display.config(text=formatted_time)
+                time.sleep(0.1)
+            except:
+                break
 
-    def test_16_read_numbers_from_file_mixed(self):
-        """Тест 16: Чтение файла со смешанным содержимым"""
-        test_data = "101\nabc\n123\n45,67,89\nxyz\n999"
+    def start_timer(self):
+        try:
+            if not self.timer_running:
+                hours = int(self.hours_var.get() or 0)
+                minutes = int(self.minutes_var.get() or 0)
+                seconds = int(self.seconds_var.get() or 0)
 
-        with patch('builtins.open', mock_open(read_data=test_data)):
-            with patch('sys.stdout', new_callable=StringIO):
-                numbers = read_numbers_from_file('test.txt')
-                self.assertEqual(numbers, [101, 123, 45, 67, 89, 999])
+                self.timer_time = hours * 3600 + minutes * 60 + seconds
 
+                if self.timer_time > 0:
+                    self.timer_running = True
+                    self.start_timer_btn.config(state=tk.DISABLED)
+                    self.stop_timer_btn.config(state=tk.NORMAL)
 
-        with patch('builtins.open', mock_open(read_data=test_data)):
-            with patch('sys.stdout', new_callable=StringIO):
-                # Читаем числа из файла
-                numbers = read_numbers_from_file('test.txt')
-                self.assertEqual(numbers, [101, 123, 0, 111, 456])
+                    self.timer_thread = threading.Thread(target=self.update_timer, daemon=True)
+                    self.timer_thread.start()
+                else:
+                    messagebox.showwarning("Предупреждение", "Установите время для таймера")
+        except ValueError:
+            messagebox.showerror("Ошибка", "Пожалуйста, введите корректные числовые значения")
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось запустить таймер: {e}")
 
-                # Обрабатываем числа
-                binary_nums, non_binary_nums = process_numbers(numbers)
-                self.assertEqual(binary_nums, [101, 0, 111])
-                self.assertEqual(non_binary_nums, [123, 456])
+    def stop_timer(self):
+        try:
+            self.timer_running = False
+            self.start_timer_btn.config(state=tk.NORMAL)
+            self.stop_timer_btn.config(state=tk.DISABLED)
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось остановить таймер: {e}")
 
-    # Тесты на производительность и стабильность
-    def test_28_performance_large_input(self):
-        """Тест 28: Обработка большого количества чисел"""
-        test_numbers = [101] * 100 + [123] * 100  # 200 чисел
+    def reset_timer(self):
 
-        with patch('sys.stdout', new_callable=StringIO):
-            binary_nums, non_binary_nums = process_numbers(test_numbers)
-            self.assertEqual(len(binary_nums), 100)
-            self.assertEqual(len(non_binary_nums), 100)
+        try:
+            self.timer_running = False
+            self.timer_time = 0
+            self.timer_display.config(text="00:00:00")
+            self.start_timer_btn.config(state=tk.NORMAL)
+            self.stop_timer_btn.config(state=tk.DISABLED)
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Не удалось сбросить таймер: {e}")
 
-    def test_29_special_characters(self):
-        """Тест 29: Специальные символы и граничные случаи"""
-        # Проверяем обработку различных входных данных
-        self.assertFalse(is_binary_number("1.0"))  # Точка
-        self.assertFalse(is_binary_number("1-0"))  # Дефис
-        self.assertFalse(is_binary_number("1+0"))  # Плюс
-        self.assertFalse(is_binary_number(" "))  # Пробел
-        self.assertFalse(is_binary_number(" 1 "))  # Пробелы вокруг
+    def update_timer(self):
+        try:
+            remaining_time = self.timer_time
+            while self.timer_running and remaining_time > 0:
+                formatted_time = self.format_time(remaining_time)
+                self.timer_display.config(text=formatted_time)
+                time.sleep(1)
+                remaining_time -= 1
 
+            if remaining_time <= 0 and self.timer_running:
+                self.timer_running = False
+                self.timer_display.config(text="00:00:00")
+                self.start_timer_btn.config(state=tk.NORMAL)
+                self.stop_timer_btn.config(state=tk.DISABLED)
+                messagebox.showinfo("Таймер", "Время вышло!")
+        except Exception as e:
+            messagebox.showerror("Ошибка", f"Ошибка в работе таймера: {e}")
+
+    def on_closing(self):
+        try:
+            self.timer_running = False
+            self.stopwatch_running = False
+            self.root.destroy()
+        except:
+            self.root.destroy()
+
+def main():
+    try:
+        root = tk.Tk()
+        app = TimerStopwatchApp(root)
+        root.mainloop()
+    except Exception as e:
+        messagebox.showerror("Критическая ошибка",
+                             f"Приложение не может быть запущено: {e}")
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    main()
